@@ -6,15 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import mobi.samdroid.objectiaacademydemo.R
 import mobi.samdroid.objectiaacademydemo.base.fragments.BaseFragment
 import mobi.samdroid.objectiaacademydemo.base.models.ObjectiaUser
 import mobi.samdroid.objectiaacademydemo.databinding.FragmentDetailsBinding
+import mobi.samdroid.objectiaacademydemo.main.viewmodels.DetailsViewModel
 
 class DetailsFragment : BaseFragment() {
     private lateinit var mBinding: FragmentDetailsBinding
-    private lateinit var mUser: ObjectiaUser
+    private val mViewModel: DetailsViewModel by viewModels()
 
     companion object {
         const val ARG_USER = "user"
@@ -36,10 +38,10 @@ class DetailsFragment : BaseFragment() {
     }
 
     private fun fetchArgs() {
-        mUser = arguments?.getSerializable(ARG_USER) as ObjectiaUser
+        mViewModel.user = arguments?.getSerializable(ARG_USER) as ObjectiaUser
     }
 
     private fun setViews() {
-        mBinding.textViewDetails.text = getString(R.string.title_details, mUser.username)
+        mBinding.textViewDetails.text = getString(R.string.title_details, mViewModel.user.username)
     }
 }
