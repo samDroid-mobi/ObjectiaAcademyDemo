@@ -5,11 +5,7 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import mobi.samdroid.objectiaacademydemo.R
-import mobi.samdroid.objectiaacademydemo.base.DataStoreManager
 import mobi.samdroid.objectiaacademydemo.base.extensions.showSnackBar
 import mobi.samdroid.objectiaacademydemo.databinding.ActivitySignUpBinding
 import mobi.samdroid.objectiaacademydemo.main.MainActivity
@@ -60,22 +56,43 @@ class SignUpActivity : AppCompatActivity() {
                 navigateToMainScreen()
             }
         }
+
+        mViewModel.liveIsUserAddedToDatabase().observe(this) {
+            navigateToMainScreen()
+        }
+
+        mViewModel.liveIsUsernameAvailable().observe(this) { isAvailable ->
+            if (isAvailable) {
+                mViewModel.saveData(
+                    this@SignUpActivity,
+                    isRememberMeChecked(),
+                    getEnteredUsername(),
+                    getEnteredPassword()
+                )
+                mViewModel.addUserToDatabase(this, getEnteredUsername(), getEnteredPassword())
+            } else {
+                showSnackBar(mBinding.root, getString(R.string.username_exists))
+            }
+        }
+
+        mViewModel.liveIsUserRegistered().observe(this) { isRegistered ->
+            if (isRegistered) {
+                navigateToMainScreen()
+            } else {
+                showSnackBar(mBinding.root, getString(R.string.user_not_registered))
+            }
+        }
     }
 
     private fun setListeners() {
         mBinding.textViewSignIn.setOnClickListener {
-            showSnackBar(mBinding.root, getString(R.string.sign_in_clicked))
+            mViewModel.checkIfUserRegistered(this, getEnteredUsername(), getEnteredPassword())
         }
 
         mBinding.buttonSignUp.setOnClickListener {
-            val username = mBinding.editTextUsername.text.toString()
-            val password = mBinding.editTextPassword.text.toString()
-            val isRememberMe = mBinding.checkboxRememberMe.isChecked
-
-            if (mViewModel.isInputValidated(username, password)) {
-                if (mViewModel.isUsernameLengthValid(username)) {
-                    mViewModel.saveData(this@SignUpActivity, isRememberMe, username, password)
-                    navigateToMainScreen()
+            if (mViewModel.isInputValidated(getEnteredUsername(), getEnteredPassword())) {
+                if (mViewModel.isUsernameLengthValid(getEnteredUsername())) {
+                    mViewModel.checkIfUsernameExists(this, getEnteredUsername())
                 } else {
                     showSnackBar(mBinding.root, getString(R.string.invalid_username_length))
                 }
@@ -97,4 +114,8 @@ class SignUpActivity : AppCompatActivity() {
         )
         mainLauncher.launch(intent)
     }
+
+    private fun getEnteredUsername(): String = mBinding.editTextUsername.text.toString()
+    private fun getEnteredPassword(): String = mBinding.editTextPassword.text.toString()
+    private fun isRememberMeChecked(): Boolean = mBinding.checkboxRememberMe.isChecked
 }

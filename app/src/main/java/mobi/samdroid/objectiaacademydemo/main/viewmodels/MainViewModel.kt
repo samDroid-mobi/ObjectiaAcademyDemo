@@ -1,17 +1,27 @@
 package mobi.samdroid.objectiaacademydemo.main.viewmodels
 
+import android.content.Context
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import mobi.samdroid.objectiaacademydemo.base.database.AppDatabase
 import mobi.samdroid.objectiaacademydemo.base.models.ObjectiaUser
 
 class MainViewModel: ViewModel() {
     lateinit var user: ObjectiaUser
+    private val mLiveGetUsers = MutableLiveData<ArrayList<ObjectiaUser>>()
 
-    fun getUsers(): ArrayList<ObjectiaUser> {
-        return arrayListOf(
-            ObjectiaUser("Sam", "Shouman", "+961 3 943 517"),
-            ObjectiaUser("Imad", "Hassan", "+961 3 123 456"),
-            ObjectiaUser("Loai", "Darsa", "+961 3 777 456"),
-            ObjectiaUser("Rayane", "Khaled", "+961 3 452 001"),
-        )
+    fun liveGetUsers(): MutableLiveData<ArrayList<ObjectiaUser>> {
+        return mLiveGetUsers
+    }
+
+    fun getUsers(context: Context) {
+        val db = AppDatabase.getDatabase(context)
+
+        viewModelScope.launch {
+            val userDao = db.objectiaUserDao()
+            mLiveGetUsers.value = userDao.getAllUsers() as ArrayList<ObjectiaUser>
+        }
     }
 }

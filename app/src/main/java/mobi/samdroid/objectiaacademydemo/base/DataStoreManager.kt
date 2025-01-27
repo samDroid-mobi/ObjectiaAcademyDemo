@@ -34,7 +34,7 @@ object DataStoreManager {
 
     suspend fun getUsername(context: Context, key: Preferences.Key<String>): String {
         val preferences = context.dataStore.data.first()
-        return preferences[key] ?: ""
+        return preferences[key] ?: ""// equivalent to: if(preferences[key] == null) "" else preferences[key]
     }
 
     suspend fun setPassword(context: Context, value: String, key: Preferences.Key<String>) {

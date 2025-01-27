@@ -42,6 +42,9 @@ class MainFragment : BaseFragment(), IClickListener {
         super.onStart()
 
         setViews()
+        setObservers()
+
+        mViewModel.getUsers(requireContext())
     }
 
     private fun setViews() {
@@ -52,12 +55,6 @@ class MainFragment : BaseFragment(), IClickListener {
                 false
             ) // @reverseLayout: to show the data in a reversed order
 
-        mBinding.recyclerViewMembers.adapter = UsersAdapter(
-            mViewModel.getUsers()
-        ).apply {
-            listener = this@MainFragment
-        }
-
         // using .apply is basically doing the below:
         /**    val adapter = UsersAdapter(arrayListOf(
         ObjectiaUser("Sam", "Shouman", "+961 3 943 517"),
@@ -67,6 +64,16 @@ class MainFragment : BaseFragment(), IClickListener {
         ))
 
         adapter.listener = this **/
+    }
+
+    private fun setObservers() {
+        mViewModel.liveGetUsers().observe(this) { users ->
+            mBinding.recyclerViewMembers.adapter = UsersAdapter(
+                users
+            ).apply {
+                listener = this@MainFragment
+            }
+        }
     }
 
     override fun onItemClick(user: ObjectiaUser) {

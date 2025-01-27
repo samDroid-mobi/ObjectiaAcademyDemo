@@ -9,12 +9,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import mobi.samdroid.objectiaacademydemo.base.DataStoreManager
+import mobi.samdroid.objectiaacademydemo.base.database.AppDatabase
+import mobi.samdroid.objectiaacademydemo.base.models.ObjectiaUser
 
 class SignUpViewModel : ViewModel() {
     private val mLiveUsername = MutableLiveData<String>()
     private val mLivePassword = MutableLiveData<String>()
     private val mLiveRememberMe = MutableLiveData<Boolean>()
     private val mLiveLoggedIn = MutableLiveData<Boolean>()
+    private val mLiveIsUserAddedToDatabase = MutableLiveData<Boolean>()
+    private val mLiveIsUsernameAvailable = MutableLiveData<Boolean>()
+    private val mLiveIsUserRegistered = MutableLiveData<Boolean>()
 
     fun liveUsername(): LiveData<String> {
         return mLiveUsername
@@ -30,6 +35,18 @@ class SignUpViewModel : ViewModel() {
 
     fun liveLoggedIn(): LiveData<Boolean> {
         return mLiveLoggedIn
+    }
+
+    fun liveIsUserAddedToDatabase(): LiveData<Boolean> {
+        return mLiveIsUserAddedToDatabase
+    }
+
+    fun liveIsUsernameAvailable(): LiveData<Boolean> {
+        return mLiveIsUsernameAvailable
+    }
+
+    fun liveIsUserRegistered(): LiveData<Boolean> {
+        return mLiveIsUserRegistered
     }
 
     fun isInputValidated(username: String, password: String): Boolean {
@@ -106,6 +123,36 @@ class SignUpViewModel : ViewModel() {
             mLiveUsername.value = username
             mLivePassword.value = password
             mLiveLoggedIn.value = isLoggedIn
+        }
+    }
+
+    fun addUserToDatabase(context: Context, username: String, password: String) {
+        val db = AppDatabase.getDatabase(context)
+        val userDao = db.objectiaUserDao()
+
+        viewModelScope.launch {
+            userDao.insert(ObjectiaUser(username= username.toLowerCase(), password = password, phone = "+961 3 943 517"))
+            mLiveIsUserAddedToDatabase.value = true
+        }
+    }
+
+    fun checkIfUsernameExists(context: Context, username: String) {
+        val db = AppDatabase.getDatabase(context)
+        val userDao = db.objectiaUserDao()
+
+        viewModelScope.launch {
+            val user = userDao.getUserByUsername(username.toLowerCase())
+            mLiveIsUsernameAvailable.value = user == null
+        }
+    }
+
+    fun checkIfUserRegistered(context: Context, username: String, password: String) {
+        val db = AppDatabase.getDatabase(context)
+        val userDao = db.objectiaUserDao()
+
+        viewModelScope.launch {
+            val user = userDao.getUserByCredentials(username.toLowerCase(), password)
+            mLiveIsUserRegistered.value = user != null
         }
     }
 }
