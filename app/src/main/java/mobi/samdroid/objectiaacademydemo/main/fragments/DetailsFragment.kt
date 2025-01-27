@@ -35,6 +35,9 @@ class DetailsFragment : BaseFragment() {
 
         fetchArgs()
         setViews()
+        setObservers()
+
+        mViewModel.getDescription()
     }
 
     private fun fetchArgs() {
@@ -43,5 +46,11 @@ class DetailsFragment : BaseFragment() {
 
     private fun setViews() {
         mBinding.textViewDetails.text = getString(R.string.title_details, mViewModel.user.username)
+    }
+
+    private fun setObservers() {
+        mViewModel.liveDescription().observe(viewLifecycleOwner) {
+            mBinding.textViewDescription.text = it
+        }
     }
 }

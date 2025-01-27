@@ -7,5 +7,5 @@ import retrofit2.http.Query
 
 interface APIService {
     @GET("loremipsum")
-    fun getDescription(@Query("paragraphs") nb: String): Call<JsonObject>
+    fun getDescription(@Query("paragraphs") nb: String): Call<JsonObject> // generated URL https://api.api-ninjas.com/v1/loremipsum?paragraphs={nb}
 }

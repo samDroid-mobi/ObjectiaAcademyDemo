@@ -77,6 +77,12 @@ class SignUpActivity : AppCompatActivity() {
 
         mViewModel.liveIsUserRegistered().observe(this) { isRegistered ->
             if (isRegistered) {
+                mViewModel.saveData(
+                    this@SignUpActivity,
+                    isRememberMeChecked(),
+                    getEnteredUsername(),
+                    getEnteredPassword()
+                )
                 navigateToMainScreen()
             } else {
                 showSnackBar(mBinding.root, getString(R.string.user_not_registered))
